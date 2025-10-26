@@ -96,7 +96,7 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     clearTokens();
-    navigate('/auth');
+    navigate('/');
   };
 
   return (
