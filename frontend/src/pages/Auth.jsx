@@ -108,6 +108,14 @@ const Auth = () => {
                   >
                     {isLoading ? 'Signing in...' : 'Sign In'}
                   </Button>
+                   <button
+                    type="button"
+                    className="w-full text-center text-sm text-gray-600 hover:underline"
+                    onClick={() => navigate('/')}
+                    data-testid="back-home-btn"
+                  >
+                    Back to Home
+                  </button>
                 </form>
               </TabsContent>
               
@@ -165,6 +173,7 @@ const Auth = () => {
                   >
                     Back to Home
                   </button>
+                  
                 </form>
               </TabsContent>
             </Tabs>

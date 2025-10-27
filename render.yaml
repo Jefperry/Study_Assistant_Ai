@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: study-assistant-backend
+    env: python
+    region: oregon
+    buildCommand: pip install -r requirements.minimal.txt
+    startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MONGO_URL
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: CORS_ORIGINS
+        sync: false
