@@ -154,13 +154,18 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def generate_summary_and_flashcards(text: str, generate_flashcards: bool = True):
     api_key = os.environ.get('EMERGENT_LLM_KEY')
+    base_url = os.environ.get('LLM_BASE_URL')  # Support for other providers like Groq
+    model = os.environ.get('LLM_MODEL', 'gpt-4o')
 
-    # Initialize OpenAI client
-    client = AsyncOpenAI(api_key=api_key)
+    # Initialize OpenAI client (works with Groq if base_url is set)
+    if base_url:
+        client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+    else:
+        client = AsyncOpenAI(api_key=api_key)
 
     # Generate summary
     summary_response = await client.chat.completions.create(
-        model="gpt-4o",
+        model=model,
         messages=[
             {"role": "system", "content": "You are an expert at summarizing academic notes. Provide clear, concise summaries that capture key concepts."},
             {"role": "user", "content": f"Summarize the following class notes concisely:\n\n{text}"}
@@ -171,11 +176,12 @@ async def generate_summary_and_flashcards(text: str, generate_flashcards: bool =
     flashcards = []
     if generate_flashcards:
         # Generate flashcards
+        # Note: Llama models (common on free tiers) might need more explicit formatting instructions
         flashcard_response = await client.chat.completions.create(
-            model="gpt-4o",
+            model=model,
             messages=[
                 {"role": "system",
-                    "content": "You are an expert at creating educational flashcards. Generate 5-7 flashcards with questions and answers based on the provided text. Format each flashcard as 'Q: [question]\\nA: [answer]' separated by double newlines."},
+                    "content": "You are an expert at creating educational flashcards. Generate 5-7 flashcards with questions and answers based on the provided text. You MUST format each flashcard exactly as 'Q: [question]\\nA: [answer]' separated by double newlines. Do not include any intro or outro text."},
                 {"role": "user", "content": f"Create flashcards from these notes:\n\n{text}"}
             ]
         )
