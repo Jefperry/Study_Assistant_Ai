@@ -9,7 +9,7 @@ python-multipart>=0.0.20
 # ============================================
 # Database (PostgreSQL + pgvector)
 # ============================================
-sqlalchemy[asyncio]>=2.0.36
+sqlalchemy[asyncio]>=2.0.40
 psycopg[binary,pool]>=3.1.0
 alembic>=1.13.1
 pgvector>=0.2.4
