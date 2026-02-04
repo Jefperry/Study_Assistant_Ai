@@ -71,16 +71,10 @@ async def register(
     # Create new user
     user = User(
         email=user_data.email.lower(),
-        password_hash=get_password_hash(user_data.password),
+        hashed_password=get_password_hash(user_data.password),
         full_name=user_data.full_name,
         tier="free",
         is_active=True,
-        papers_uploaded=0,
-        papers_limit=10,  # Free tier limit
-        summaries_generated=0,
-        summaries_limit=20,
-        searches_performed=0,
-        searches_limit=50,
     )
     
     db.add(user)
@@ -124,7 +118,7 @@ async def login(
     )
     user = result.scalar_one_or_none()
     
-    if not user or not verify_password(credentials.password, user.password_hash):
+    if not user or not verify_password(credentials.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -273,14 +267,14 @@ async def change_password(
     Requires the current password for verification.
     """
     # Verify current password
-    if not verify_password(password_data.current_password, current_user.password_hash):
+    if not verify_password(password_data.current_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect"
         )
     
     # Update password
-    current_user.password_hash = get_password_hash(password_data.new_password)
+    current_user.hashed_password = get_password_hash(password_data.new_password)
     await db.commit()
     
     logger.info(f"Password changed for user: {current_user.email}")

@@ -102,13 +102,9 @@ class UserResponse(BaseModel):
 
 class UserDetailResponse(UserResponse):
     """Schema for detailed user response (includes usage)."""
-    papers_uploaded: int
-    papers_limit: int
-    summaries_generated: int
-    summaries_limit: int
-    searches_performed: int
-    searches_limit: int
+    is_verified: bool = False
     last_login_at: Optional[datetime] = None
+    daily_upload_count: int = 0
     
     model_config = {"from_attributes": True}
 

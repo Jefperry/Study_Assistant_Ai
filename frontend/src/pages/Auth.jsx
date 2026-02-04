@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { Brain, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { API, setTokens } from '../App';
+import { useAuth } from '../App';
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { login, register, isAuthenticated } = useAuth();
   const [isRegistering, setIsRegistering] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -15,6 +15,13 @@ const Auth = () => {
     email: '',
     password: ''
   });
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,12 +44,13 @@ const Auth = () => {
     }
 
     try {
-      const endpoint = isRegistering ? 'register' : 'login';
-      const payload = isRegistering ? formData : { email: formData.email, password: formData.password };
-
-      const response = await axios.post(`${API}/auth/${endpoint}`, payload);
-      setTokens(response.data.access_token, response.data.refresh_token);
-      toast.success(isRegistering ? 'Account created successfully!' : 'Welcome back!');
+      if (isRegistering) {
+        await register(formData.name, formData.email, formData.password);
+        toast.success('Account created successfully!');
+      } else {
+        await login(formData.email, formData.password);
+        toast.success('Welcome back!');
+      }
       navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Authentication failed');

@@ -70,8 +70,11 @@ class SummaryResponse(BaseModel):
 
 class SummaryListResponse(BaseModel):
     """Schema for list of summaries."""
-    summaries: list[SummaryResponse]
+    items: list[SummaryResponse] = []
+    summaries: list[SummaryResponse] = []  # For backward compatibility
     total: int
+    page: int = 1
+    page_size: int = 20
 
 
 class FlashcardResponse(BaseModel):

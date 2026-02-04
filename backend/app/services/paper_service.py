@@ -98,7 +98,35 @@ class PaperService:
         if not user:
             return False
         
-        return user.papers_uploaded < user.papers_limit
+        # Using daily_upload_count instead of papers_uploaded
+        # Free tier: 5/day, Verified: 20/day, Premium: unlimited
+        limits = {"free": 5, "verified": 20, "premium": 1000}
+        limit = limits.get(user.tier, 5)
+        return user.daily_upload_count < limit
+    
+    async def check_upload_limit(self, user) -> tuple[bool, str]:
+        """
+        Check if user can upload based on daily limit.
+        
+        Returns:
+            Tuple of (can_upload: bool, message: str)
+        """
+        from datetime import datetime, timezone
+        
+        # Reset daily count if needed
+        now = datetime.now(timezone.utc)
+        if user.daily_upload_reset_at is None or user.daily_upload_reset_at.date() < now.date():
+            user.daily_upload_count = 0
+            user.daily_upload_reset_at = now
+        
+        # Check limits by tier
+        limits = {"free": 5, "verified": 20, "premium": 1000}
+        limit = limits.get(user.tier, 5)
+        
+        if user.daily_upload_count >= limit:
+            return False, f"Daily upload limit reached ({limit}/day). Upgrade your plan for more."
+        
+        return True, "OK"
     
     async def create_paper_from_upload(
         self,
@@ -161,13 +189,13 @@ class PaperService:
         
         self.db.add(job)
         
-        # Update user usage
+        # Update user daily upload count
         from app.models.user import User
         result = await self.db.execute(
             select(User).where(User.id == user_id)
         )
         user = result.scalar_one()
-        user.papers_uploaded += 1
+        user.daily_upload_count += 1
         
         await self.db.commit()
         await self.db.refresh(paper)

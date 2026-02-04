@@ -116,6 +116,50 @@ async def create_summary(
 
 
 @router.get(
+    "",
+    response_model=SummaryListResponse,
+    summary="List all summaries",
+    description="Get all summaries for the current user with pagination."
+)
+async def list_summaries(
+    page: int = 1,
+    page_size: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> SummaryListResponse:
+    """List all summaries for the current user."""
+    offset = (page - 1) * page_size
+    
+    # Get summaries for user's papers
+    result = await db.execute(
+        select(Summary)
+        .join(Paper)
+        .where(Paper.user_id == current_user.id)
+        .order_by(Summary.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
+    summaries = result.scalars().all()
+    
+    # Get total count
+    from sqlalchemy import func
+    count_result = await db.execute(
+        select(func.count())
+        .select_from(Summary)
+        .join(Paper)
+        .where(Paper.user_id == current_user.id)
+    )
+    total = count_result.scalar() or 0
+    
+    return SummaryListResponse(
+        items=[SummaryResponse.model_validate(s) for s in summaries],
+        total=total,
+        page=page,
+        page_size=page_size
+    )
+
+
+@router.get(
     "/paper/{paper_id}",
     response_model=SummaryListResponse,
     summary="Get summaries for a paper",

@@ -62,12 +62,16 @@ class Settings(BaseSettings):
     # 
     # CORS
     # 
-    CORS_ORIGINS: str = "*"
+    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,https://study-assistant-ai.vercel.app"
 
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS_ORIGINS string into a list."""
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        # If "*" is specified, return it as a list for the middleware
+        if "*" in origins:
+            return ["*"]
+        return origins
 
     # 
     # Pydantic v2 Configuration

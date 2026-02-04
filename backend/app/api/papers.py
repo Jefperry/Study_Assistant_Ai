@@ -83,12 +83,13 @@ async def upload_paper(
             detail="Empty file"
         )
     
-    # Check user quota
+    # Check user quota (simplified - using daily limit)
     service = PaperService(db)
-    if not await service.check_usage_limit(current_user.id):
+    can_upload, message = await service.check_upload_limit(current_user)
+    if not can_upload:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Upload limit reached ({current_user.papers_limit} papers). Upgrade your plan for more."
+            detail=message
         )
     
     # Parse tags

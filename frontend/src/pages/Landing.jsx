@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Brain, BookOpen, Sparkles, Mic, FileText, Video, Link as LinkIcon, ArrowRight } from 'lucide-react';
-import { isAuthenticated } from '../App';
+import { isAuthenticated } from '../services/api';
 import { useEffect } from 'react';
 
 const Landing = () => {
