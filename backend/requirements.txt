@@ -1,15 +1,15 @@
 ﻿# ============================================
 # Core FastAPI & Web Server
 # ============================================
-fastapi==0.110.1
-uvicorn[standard]==0.25.0
-starlette==0.37.2
-python-multipart==0.0.20
+fastapi>=0.110.1
+uvicorn[standard]>=0.25.0
+starlette>=0.37.2
+python-multipart>=0.0.20
 
 # ============================================
 # Database (PostgreSQL + pgvector)
 # ============================================
-sqlalchemy[asyncio]==2.0.25
+sqlalchemy[asyncio]>=2.0.36
 psycopg[binary,pool]>=3.1.0
 alembic>=1.13.1
 pgvector>=0.2.4
