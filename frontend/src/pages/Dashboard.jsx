@@ -55,8 +55,20 @@ const Dashboard = () => {
   const fetchPapers = async () => {
     try {
       const response = await papersAPI.list();
-      setPapers(response.data.items || response.data);
+      const data = response.data;
+      // Handle various response formats
+      if (Array.isArray(data)) {
+        setPapers(data);
+      } else if (data?.items && Array.isArray(data.items)) {
+        setPapers(data.items);
+      } else if (data?.papers && Array.isArray(data.papers)) {
+        setPapers(data.papers);
+      } else {
+        setPapers([]);
+      }
     } catch (error) {
+      console.error('Failed to load papers:', error);
+      setPapers([]);
       toast.error('Failed to load papers');
     }
   };
@@ -157,8 +169,20 @@ const Dashboard = () => {
   const fetchSummaries = async () => {
     try {
       const response = await summariesAPI.list();
-      setSummaries(response.data.items || response.data || []);
+      const data = response.data;
+      // Handle various response formats
+      if (Array.isArray(data)) {
+        setSummaries(data);
+      } else if (data?.items && Array.isArray(data.items)) {
+        setSummaries(data.items);
+      } else if (data?.summaries && Array.isArray(data.summaries)) {
+        setSummaries(data.summaries);
+      } else {
+        setSummaries([]);
+      }
     } catch (error) {
+      console.error('Failed to load summaries:', error);
+      setSummaries([]);
       toast.error('Failed to load summaries');
     }
   };
@@ -188,11 +212,21 @@ const Dashboard = () => {
     setIsSearching(true);
     try {
       const response = await searchAPI.semantic(searchQuery, 10);
-      setSearchResults(response.data.results || []);
-      if (response.data.results?.length === 0) {
+      const data = response.data;
+      // Handle various response formats
+      if (Array.isArray(data)) {
+        setSearchResults(data);
+      } else if (data?.results && Array.isArray(data.results)) {
+        setSearchResults(data.results);
+      } else {
+        setSearchResults([]);
+      }
+      if (searchResults.length === 0) {
         toast.info('No results found');
       }
     } catch (error) {
+      console.error('Search failed:', error);
+      setSearchResults([]);
       toast.error('Search failed');
     } finally {
       setIsSearching(false);
