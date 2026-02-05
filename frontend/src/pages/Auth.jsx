@@ -42,6 +42,31 @@ const Auth = () => {
       setIsLoading(false);
       return;
     }
+    
+    // Client-side password validation for registration
+    if (isRegistering) {
+      const password = formData.password;
+      if (password.length < 8) {
+        toast.error("Password must be at least 8 characters");
+        setIsLoading(false);
+        return;
+      }
+      if (!/[A-Z]/.test(password)) {
+        toast.error("Password must contain at least one uppercase letter");
+        setIsLoading(false);
+        return;
+      }
+      if (!/[a-z]/.test(password)) {
+        toast.error("Password must contain at least one lowercase letter");
+        setIsLoading(false);
+        return;
+      }
+      if (!/[0-9]/.test(password)) {
+        toast.error("Password must contain at least one digit");
+        setIsLoading(false);
+        return;
+      }
+    }
 
     try {
       if (isRegistering) {
@@ -53,7 +78,26 @@ const Auth = () => {
       }
       navigate('/dashboard');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Authentication failed');
+      // Handle FastAPI validation errors (422)
+      const errorData = error.response?.data;
+      let errorMessage = 'Authentication failed';
+      
+      if (errorData?.detail) {
+        if (Array.isArray(errorData.detail)) {
+          // Pydantic validation errors come as an array
+          errorMessage = errorData.detail
+            .map(err => err.msg || err.message || String(err))
+            .join('. ');
+        } else if (typeof errorData.detail === 'object') {
+          // Single error object
+          errorMessage = errorData.detail.msg || errorData.detail.message || JSON.stringify(errorData.detail);
+        } else {
+          // String error
+          errorMessage = String(errorData.detail);
+        }
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
