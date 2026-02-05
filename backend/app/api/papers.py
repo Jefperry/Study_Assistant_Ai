@@ -5,9 +5,11 @@ Handles paper upload, retrieval, and management.
 """
 
 import logging
+import re
 from typing import Optional
 from uuid import UUID
 
+import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -125,10 +127,175 @@ async def upload_paper(
             detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Upload failed: {e}")
+        logger.error(f"Upload failed: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process upload"
+            detail=f"Failed to process upload: {str(e)}"
+        )
+
+
+# ===========================================
+# ArXiv Import Endpoint
+# ===========================================
+
+def extract_arxiv_id(url_or_id: str) -> Optional[str]:
+    """
+    Extract ArXiv ID from URL or direct ID input.
+    
+    Supports:
+    - https://arxiv.org/abs/2301.00001
+    - https://arxiv.org/pdf/2301.00001.pdf
+    - https://arxiv.org/abs/2301.00001v2
+    - 2301.00001
+    - 2301.00001v2
+    """
+    # Pattern for ArXiv IDs (new format since 2007)
+    arxiv_pattern = r'(\d{4}\.\d{4,5}(?:v\d+)?)'
+    
+    # Try to extract from URL
+    match = re.search(arxiv_pattern, url_or_id)
+    if match:
+        return match.group(1)
+    
+    return None
+
+
+@router.post(
+    "/arxiv",
+    response_model=UploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Import paper from ArXiv",
+    description="Import a paper from ArXiv by URL or ID."
+)
+async def import_arxiv_paper(
+    request: dict,  # Accept flexible input: {"url": "..."} or {"arxiv_id": "..."}
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> UploadResponse:
+    """
+    Import a paper from ArXiv.
+    
+    Accepts either:
+    - {"url": "https://arxiv.org/abs/2301.00001"}
+    - {"arxiv_id": "2301.00001"}
+    """
+    # Extract ArXiv ID from request
+    url_or_id = request.get("url") or request.get("arxiv_id") or ""
+    arxiv_id = extract_arxiv_id(url_or_id)
+    
+    if not arxiv_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid ArXiv URL or ID. Please provide a valid ArXiv paper URL (e.g., https://arxiv.org/abs/2301.00001) or ID (e.g., 2301.00001)"
+        )
+    
+    # Check user quota
+    service = PaperService(db)
+    can_upload, message = await service.check_upload_limit(current_user)
+    if not can_upload:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=message
+        )
+    
+    try:
+        # Fetch paper metadata from ArXiv API
+        arxiv_api_url = f"http://export.arxiv.org/api/query?id_list={arxiv_id}"
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(arxiv_api_url)
+            response.raise_for_status()
+        
+        # Parse the Atom XML response
+        import xml.etree.ElementTree as ET
+        root = ET.fromstring(response.text)
+        
+        # Namespace handling for Atom feed
+        ns = {
+            'atom': 'http://www.w3.org/2005/Atom',
+            'arxiv': 'http://arxiv.org/schemas/atom'
+        }
+        
+        entry = root.find('atom:entry', ns)
+        if entry is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"ArXiv paper not found: {arxiv_id}"
+            )
+        
+        # Extract metadata
+        title_elem = entry.find('atom:title', ns)
+        title = title_elem.text.strip().replace('\n', ' ') if title_elem is not None else f"ArXiv: {arxiv_id}"
+        
+        summary_elem = entry.find('atom:summary', ns)
+        abstract = summary_elem.text.strip() if summary_elem is not None else None
+        
+        authors = []
+        for author in entry.findall('atom:author', ns):
+            name_elem = author.find('atom:name', ns)
+            if name_elem is not None:
+                authors.append(name_elem.text.strip())
+        
+        # Get PDF URL
+        pdf_link = None
+        for link in entry.findall('atom:link', ns):
+            if link.get('title') == 'pdf':
+                pdf_link = link.get('href')
+                break
+        
+        if not pdf_link:
+            pdf_link = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
+        
+        # Download PDF
+        logger.info(f"Downloading PDF from ArXiv: {pdf_link}")
+        async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+            pdf_response = await client.get(pdf_link)
+            pdf_response.raise_for_status()
+            pdf_content = pdf_response.content
+        
+        if len(pdf_content) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Failed to download PDF from ArXiv"
+            )
+        
+        if len(pdf_content) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"PDF too large. Maximum size is {MAX_FILE_SIZE // (1024*1024)}MB"
+            )
+        
+        # Create paper from downloaded content
+        paper, job = await service.create_paper_from_arxiv(
+            user_id=current_user.id,
+            file_content=pdf_content,
+            arxiv_id=arxiv_id,
+            title=title,
+            authors=authors,
+            abstract=abstract,
+        )
+        
+        logger.info(f"ArXiv paper imported: {paper.id} ({arxiv_id}) by user {current_user.id}")
+        
+        return UploadResponse(
+            paper=PaperResponse.model_validate(paper),
+            job=ProcessingJobResponse.model_validate(job),
+            message=f"ArXiv paper '{arxiv_id}' imported successfully"
+        )
+        
+    except HTTPException:
+        raise
+    except httpx.HTTPStatusError as e:
+        logger.error(f"ArXiv API/download failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to fetch from ArXiv: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"ArXiv import failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to import ArXiv paper: {str(e)}"
         )
 
 

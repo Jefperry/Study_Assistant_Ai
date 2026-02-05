@@ -205,6 +205,97 @@ class PaperService:
         
         return paper, job
     
+    async def create_paper_from_arxiv(
+        self,
+        user_id: UUID,
+        file_content: bytes,
+        arxiv_id: str,
+        title: str,
+        authors: Optional[List[str]] = None,
+        abstract: Optional[str] = None,
+        tags: Optional[List[str]] = None
+    ) -> tuple[Paper, ProcessingJob]:
+        """
+        Create a paper from ArXiv import.
+        
+        Returns:
+            Tuple of (Paper, ProcessingJob)
+        """
+        # Process PDF
+        pdf_data = await pdf_processor.process_pdf(file_content)
+        
+        # Check for duplicates by arxiv_id or file hash
+        existing = await self.check_duplicate(user_id, pdf_data["file_hash"])
+        if existing:
+            raise ValueError(f"This paper has already been uploaded (ID: {existing.id})")
+        
+        # Also check by arxiv_id
+        from sqlalchemy import select
+        result = await self.db.execute(
+            select(Paper).where(
+                Paper.user_id == user_id,
+                Paper.arxiv_id == arxiv_id
+            )
+        )
+        existing_arxiv = result.scalar_one_or_none()
+        if existing_arxiv:
+            raise ValueError(f"This ArXiv paper has already been imported (ID: {existing_arxiv.id})")
+        
+        # Create paper record
+        paper = Paper(
+            user_id=user_id,
+            title=title,
+            authors=authors or pdf_data.get("authors"),
+            abstract=abstract or pdf_data.get("abstract"),
+            arxiv_id=arxiv_id,
+            source=PaperSource.ARXIV.value,
+            file_hash=pdf_data["file_hash"],
+            status=ProcessingStatus.PROCESSING.value,
+            page_count=pdf_data.get("page_count"),
+            word_count=pdf_data.get("word_count"),
+            tags=tags,
+        )
+        
+        self.db.add(paper)
+        await self.db.flush()  # Get paper ID
+        
+        # Create paper content
+        content = PaperContent(
+            paper_id=paper.id,
+            full_text=pdf_data.get("full_text"),
+            sections=pdf_data.get("sections"),
+            extraction_metadata=pdf_data.get("metadata"),
+        )
+        
+        self.db.add(content)
+        
+        # Create processing job
+        job = ProcessingJob(
+            paper_id=paper.id,
+            user_id=user_id,
+            job_type="full_processing",
+            status=ProcessingStatus.PENDING.value,
+            progress=0,
+        )
+        
+        self.db.add(job)
+        
+        # Update user daily upload count
+        from app.models.user import User
+        result = await self.db.execute(
+            select(User).where(User.id == user_id)
+        )
+        user = result.scalar_one()
+        user.daily_upload_count += 1
+        
+        await self.db.commit()
+        await self.db.refresh(paper)
+        await self.db.refresh(job)
+        
+        logger.info(f"ArXiv paper created: {paper.id} ({arxiv_id}) for user {user_id}")
+        
+        return paper, job
+    
     async def update_paper_status(
         self,
         paper_id: UUID,
