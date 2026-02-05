@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Brain, BookOpen, Sparkles, Mic, FileText, Video, Link as LinkIcon, ArrowRight } from 'lucide-react';
+import { Brain, BookOpen, Sparkles, Search, FileText, Zap, ArrowRight, GraduationCap, Library, Lightbulb } from 'lucide-react';
 import { isAuthenticated } from '../services/api';
 import { useEffect } from 'react';
 
@@ -14,216 +14,337 @@ const Landing = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#F9F9F9] text-[#1A1A1A] font-sans overflow-x-hidden relative selection:bg-blue-100">
+    <div className="min-h-screen bg-scholarly-light font-sans overflow-x-hidden relative selection:bg-amber-100">
+      
+      {/* Noise Texture Overlay */}
+      <div className="noise-texture" />
 
-      {/* Background Ambience */}
+      {/* Background Gradient Accents */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-blue-200/20 rounded-full blur-[120px]" />
-        <div className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] bg-purple-200/20 rounded-full blur-[120px]" />
+        <div className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] bg-amber-500/5 rounded-full blur-[150px]" />
+        <div className="absolute top-[40%] -left-[20%] w-[50%] h-[50%] bg-ink-200/10 rounded-full blur-[120px]" />
       </div>
 
       {/* Navbar */}
-      <header className="relative z-10 container mx-auto px-6 py-6">
+      <header className="relative z-10 container mx-auto px-6 lg:px-12 py-6">
         <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-black rounded-xl flex items-center justify-center text-white">
-              <Brain className="w-5 h-5 md:w-6 md:h-6" />
+          {/* Logo - Left aligned */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-ink-900 rounded-xl flex items-center justify-center shadow-lg">
+              <GraduationCap className="w-5 h-5 md:w-6 md:h-6 text-amber-400" />
             </div>
-            <span className="text-xl md:text-2xl font-bold tracking-tight text-[#1A1A1A]">NoteMind AI</span>
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-display font-bold tracking-tight text-ink-900">Study Assistant</span>
+              <span className="text-xs font-mono text-ink-400 tracking-wider">AI-POWERED RESEARCH</span>
+            </div>
           </div>
 
-          {/* Center Links (Desktop) */}
+          {/* Nav Links (Desktop) - Right side */}
           <div className="hidden md:flex items-center gap-8">
-            {['Features', 'How it works', 'Pricing', 'Blog'].map((item) => (
-              <a key={item} href="#" className="text-sm font-medium text-gray-500 hover:text-[#1A1A1A] transition-colors">
-                {item}
-              </a>
-            ))}
+            <a href="#features" className="text-sm font-medium text-ink-500 hover:text-ink-900 transition-colors">
+              Features
+            </a>
+            <a href="#how-it-works" className="text-sm font-medium text-ink-500 hover:text-ink-900 transition-colors">
+              How it works
+            </a>
+            <Button
+              onClick={() => navigate('/auth')}
+              className="rounded-lg bg-ink-900 hover:bg-ink-800 text-paper-warm px-6 py-5 text-sm font-medium transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+              data-testid="header-get-started-btn"
+            >
+              Get Started
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           </div>
 
-          {/* CTA Button */}
+          {/* Mobile CTA */}
           <Button
             onClick={() => navigate('/auth')}
-            className="rounded-full bg-[#4F46E5] hover:bg-[#4338ca] text-white px-6 md:px-8 py-2 md:py-6 text-sm font-medium transition-all shadow-lg shadow-indigo-500/20"
-            data-testid="header-get-started-btn"
+            className="md:hidden rounded-lg bg-ink-900 hover:bg-ink-800 text-paper-warm px-4 py-2 text-sm font-medium"
+            data-testid="header-get-started-btn-mobile"
           >
-            Get Started Free
+            Get Started
           </Button>
         </nav>
       </header>
 
-      {/* Hero Section */}
-      <section className="relative z-10 container mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-32 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1
-            className="text-5xl md:text-7xl font-bold tracking-tight text-[#1A1A1A] mb-6 leading-[1.1]"
-            data-testid="hero-heading"
-          >
-            Capture. Summarize. <br className="hidden md:block" /> Understand.
-          </h1>
-
-          <p className="text-lg md:text-xl text-gray-500 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Transform messy lectures, meetings, and documents into clear, actionable summaries instantly with AI.
-          </p>
-
-          {/* Progress Indicator Visualization */}
-          <div className="flex items-center justify-center gap-4 md:gap-8 mb-16 opacity-80">
-            {/* Step 1: Input */}
-            <div className="flex flex-col items-center gap-3 group cursor-default">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white border border-gray-100 shadow-sm flex items-center justify-center text-gray-400 group-hover:text-blue-500 group-hover:border-blue-100 transition-all">
-                <Mic className="w-6 h-6" />
-              </div>
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Input</span>
+      {/* Hero Section - LEFT ALIGNED */}
+      <section className="relative z-10 container mx-auto px-6 lg:px-12 pt-16 pb-20 md:pt-24 md:pb-32">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          
+          {/* Left: Text Content */}
+          <div className="text-left">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 text-amber-800 text-sm font-medium mb-8 animate-fade-in-up">
+              <Sparkles className="w-4 h-4" />
+              <span>AI-Powered Academic Research</span>
             </div>
 
-            {/* Connector */}
-            <div className="w-12 h-[2px] bg-gray-200" />
+            <h1
+              className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight text-ink-900 mb-6 leading-[1.1] animate-fade-in-up stagger-1"
+              data-testid="hero-heading"
+            >
+              Research smarter,<br />
+              <span className="gradient-text">not harder.</span>
+            </h1>
 
-            {/* Step 2: Processing */}
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-[#1A1A1A] text-white shadow-lg flex items-center justify-center relative overflow-hidden">
-                <Sparkles className="w-6 h-6 animate-pulse" />
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-purple-500/20" />
-              </div>
-              <span className="text-xs font-semibold text-[#1A1A1A] uppercase tracking-wider">AI Process</span>
+            <p className="text-lg md:text-xl text-ink-500 mb-10 leading-relaxed max-w-xl animate-fade-in-up stagger-2">
+              Upload academic papers, get AI-generated summaries, and search across your research library with semantic understanding.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in-up stagger-3">
+              <Button
+                onClick={() => navigate('/auth')}
+                className="rounded-lg bg-amber-500 hover:bg-amber-600 text-ink-900 px-8 py-6 text-base font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 glow-amber"
+                data-testid="hero-cta-btn"
+              >
+                Start Free Today
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                className="rounded-lg border-2 border-ink-200 text-ink-700 hover:bg-ink-50 px-8 py-6 text-base font-medium"
+              >
+                See How It Works
+              </Button>
             </div>
 
-            {/* Connector */}
-            <div className="w-12 h-[2px] bg-gray-200" />
-
-            {/* Step 3: Output */}
-            <div className="flex flex-col items-center gap-3 group cursor-default">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white border border-gray-100 shadow-sm flex items-center justify-center text-gray-400 group-hover:text-green-500 group-hover:border-green-100 transition-all">
-                <FileText className="w-6 h-6" />
+            {/* Stats */}
+            <div className="flex gap-8 pt-8 border-t border-ink-100 animate-fade-in-up stagger-4">
+              <div>
+                <div className="text-2xl font-display font-bold text-ink-900">Fast</div>
+                <div className="text-sm text-ink-400 font-mono">SUMMARIZATION</div>
               </div>
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Result</span>
+              <div>
+                <div className="text-2xl font-display font-bold text-ink-900">Smart</div>
+                <div className="text-sm text-ink-400 font-mono">SEMANTIC SEARCH</div>
+              </div>
+              <div>
+                <div className="text-2xl font-display font-bold text-ink-900">Secure</div>
+                <div className="text-sm text-ink-400 font-mono">YOUR DATA</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Visual Element */}
+          <div className="relative animate-fade-in-up stagger-2 hidden lg:block">
+            {/* Main Card */}
+            <div className="scholarly-card p-6 rounded-2xl relative z-10 transform rotate-1 hover:rotate-0 transition-transform duration-500">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div className="font-display font-semibold text-ink-900">Research Paper</div>
+                  <div className="text-sm text-ink-400 font-mono">quantum-computing.pdf</div>
+                </div>
+              </div>
+              <div className="space-y-2 mb-4">
+                <div className="h-2 w-full bg-ink-100 rounded" />
+                <div className="h-2 w-[85%] bg-ink-100 rounded" />
+                <div className="h-2 w-[90%] bg-ink-100 rounded" />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-amber-600 font-medium">
+                <Zap className="w-4 h-4" />
+                <span>AI Summary Generated</span>
+              </div>
+            </div>
+
+            {/* Floating Cards */}
+            <div className="absolute -top-4 -right-4 scholarly-card p-4 rounded-xl transform -rotate-3 animate-float z-0">
+              <div className="flex items-center gap-2">
+                <Search className="w-4 h-4 text-ink-400" />
+                <span className="text-sm text-ink-500 font-mono">semantic search...</span>
+              </div>
+            </div>
+
+            <div className="absolute -bottom-6 -left-6 scholarly-card p-4 rounded-xl transform rotate-2 animate-float z-20" style={{ animationDelay: '1s' }}>
+              <div className="flex items-center gap-2">
+                <Brain className="w-4 h-4 text-amber-500" />
+                <span className="text-sm font-medium text-ink-700">98% Relevance</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Feature Cards Grid - Bento Grid Style */}
-      <section className="relative z-10 container mx-auto px-6 pb-24">
-        <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+      {/* Features Section - Asymmetric Grid */}
+      <section id="features" className="relative z-10 container mx-auto px-6 lg:px-12 py-24 scroll-mt-20">
+        <div className="mb-16 animate-fade-in-up">
+          <span className="text-sm font-mono text-amber-600 tracking-wider uppercase mb-4 block">FEATURES</span>
+          <h2 className="text-3xl md:text-4xl font-display font-bold text-ink-900 mb-4">
+            Everything you need for<br />academic excellence
+          </h2>
+          <p className="text-ink-500 max-w-2xl">
+            A complete toolkit designed specifically for researchers, students, and academics.
+          </p>
+        </div>
 
-          {/* Card 1: Instant Clarity */}
+        {/* Bento Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {/* Feature 1: PDF Upload - Large */}
           <div
-            className="group bg-white rounded-[32px] p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] flex flex-col justify-between h-[400px] overflow-hidden relative"
+            className="group scholarly-card p-8 rounded-2xl lg:col-span-2 flex flex-col justify-between min-h-[300px] hover:-translate-y-1 transition-all duration-300 animate-fade-in-up stagger-1"
             data-testid="feature-card-1"
           >
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Smart Condensing</h3>
-              <p className="text-sm text-gray-500">Turn hours of recordings into a 5-minute read.</p>
-            </div>
-
-            {/* Visual: Chaos to Order */}
-            <div className="absolute inset-x-0 bottom-0 top-20 p-6 flex items-center justify-center bg-gradient-to-t from-gray-50/50 to-transparent">
-              <div className="flex items-center gap-4 w-full">
-                {/* Left: Chaos */}
-                <div className="flex-1 opacity-30 scale-90">
-                  <div className="h-2 w-full bg-gray-800 rounded mb-2 rotate-1" />
-                  <div className="h-2 w-[80%] bg-gray-800 rounded mb-2 -rotate-1" />
-                  <div className="h-2 w-[90%] bg-gray-800 rounded mb-2 rotate-2" />
-                  <div className="h-2 w-[60%] bg-gray-800 rounded rotate-1" />
-                </div>
-                {/* Arrow */}
-                <div className="text-blue-500">
-                  <ArrowRight className="w-6 h-6" />
-                </div>
-                {/* Right: Order */}
-                <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 p-4 scale-105">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    <div className="h-2 w-full bg-gray-200 rounded" />
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    <div className="h-2 w-[80%] bg-gray-200 rounded" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    <div className="h-2 w-[60%] bg-gray-200 rounded" />
-                  </div>
-                </div>
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <FileText className="w-6 h-6 text-amber-600" />
               </div>
+              <h3 className="text-xl font-display font-bold text-ink-900 mb-2">Upload & Process PDFs</h3>
+              <p className="text-ink-500 max-w-md">
+                Drop your research papers, textbooks, or lecture notes. Our AI extracts and indexes all content for intelligent retrieval.
+              </p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <div className="px-3 py-1.5 bg-ink-100 rounded-full text-xs font-mono text-ink-600">PDF</div>
+              <div className="px-3 py-1.5 bg-ink-100 rounded-full text-xs font-mono text-ink-600">TXT</div>
+              <div className="px-3 py-1.5 bg-ink-100 rounded-full text-xs font-mono text-ink-600">DOC</div>
             </div>
           </div>
 
-          {/* Card 2: Multi-Modal Ingestion */}
+          {/* Feature 2: AI Summaries */}
           <div
-            className="group bg-white rounded-[32px] p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] flex flex-col justify-between h-[400px] overflow-hidden relative"
+            className="group scholarly-card p-8 rounded-2xl flex flex-col justify-between min-h-[300px] hover:-translate-y-1 transition-all duration-300 animate-fade-in-up stagger-2"
             data-testid="feature-card-2"
           >
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Multi-Modal Ingestion</h3>
-              <p className="text-sm text-gray-500">Audio, text, or video—we summarize it all.</p>
-            </div>
-
-            {/* Visual: Central Hub */}
-            <div className="absolute inset-0 top-20 flex items-center justify-center">
-              <div className="relative">
-                {/* Center Brain */}
-                <div className="w-16 h-16 bg-[#1A1A1A] rounded-2xl flex items-center justify-center text-white relative z-10 shadow-xl">
-                  <Brain className="w-8 h-8" />
-                </div>
-
-                {/* Orbiting Icons */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border border-gray-100 rounded-full -z-0" />
-
-                <div className="absolute -top-12 -left-8 w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center shadow-sm animate-bounce duration-[3000ms]">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div className="absolute -top-12 -right-8 w-10 h-10 bg-blue-50 text-blue-500 rounded-lg flex items-center justify-center shadow-sm animate-bounce duration-[3000ms] delay-75">
-                  <Video className="w-5 h-5" />
-                </div>
-                <div className="absolute -bottom-16 left-0 w-10 h-10 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center shadow-sm animate-bounce duration-[3000ms] delay-150">
-                  <Mic className="w-5 h-5" />
-                </div>
-                <div className="absolute -bottom-12 -right-6 w-10 h-10 bg-green-50 text-green-500 rounded-lg flex items-center justify-center shadow-sm animate-bounce duration-[3000ms] delay-300">
-                  <LinkIcon className="w-5 h-5" />
-                </div>
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-ink-900 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-6 h-6 text-amber-400" />
               </div>
+              <h3 className="text-xl font-display font-bold text-ink-900 mb-2">AI Summaries</h3>
+              <p className="text-ink-500">
+                Get instant, accurate summaries powered by advanced language models. Understand papers in minutes.
+              </p>
+            </div>
+            <div className="mt-6 flex items-center gap-2 text-amber-600 font-medium text-sm">
+              <Zap className="w-4 h-4" />
+              <span>Powered by Groq & BART</span>
             </div>
           </div>
 
-          {/* Card 3: Active Recall */}
+          {/* Feature 3: Semantic Search */}
           <div
-            className="group bg-white rounded-[32px] p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-gray-100 transition-all duration-300 ease-in-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] flex flex-col justify-between h-[400px] overflow-hidden relative"
+            className="group scholarly-card p-8 rounded-2xl flex flex-col justify-between min-h-[300px] hover:-translate-y-1 transition-all duration-300 animate-fade-in-up stagger-3"
             data-testid="feature-card-3"
           >
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold text-[#1A1A1A] mb-1">Study & Interact</h3>
-              <p className="text-sm text-gray-500">Generate flashcards and chat with your notes.</p>
-            </div>
-
-            {/* Visual: Flashcards & Chat */}
-            <div className="absolute inset-x-0 bottom-0 p-6 space-y-3">
-              {/* Flashcard Mock */}
-              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 transform -rotate-2 origin-bottom-left transition-transform group-hover:rotate-0">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">Concept</span>
-                  <BookOpen className="w-3 h-3 text-indigo-400" />
-                </div>
-                <div className="h-2 w-3/4 bg-indigo-200/50 rounded mb-1" />
-                <div className="h-2 w-1/2 bg-indigo-200/50 rounded" />
+            <div>
+              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Search className="w-6 h-6 text-amber-600" />
               </div>
+              <h3 className="text-xl font-display font-bold text-ink-900 mb-2">Semantic Search</h3>
+              <p className="text-ink-500">
+                Search by meaning, not just keywords. Find relevant passages across all your documents instantly.
+              </p>
+            </div>
+            <div className="mt-6 p-3 bg-ink-50 rounded-lg">
+              <div className="text-xs font-mono text-ink-400 mb-1">Query:</div>
+              <div className="text-sm text-ink-700">"quantum entanglement applications"</div>
+            </div>
+          </div>
 
-              {/* Chat Bubble Mock */}
-              <div className="bg-white border border-gray-100 rounded-xl p-3 shadow-sm transform translate-x-2 transition-transform group-hover:translate-x-0">
-                <div className="flex gap-2">
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex-shrink-0" />
-                  <div className="space-y-1.5 flex-1">
-                    <div className="h-2 w-[90%] bg-gray-100 rounded" />
-                    <div className="h-2 w-[60%] bg-gray-100 rounded" />
-                  </div>
-                </div>
+          {/* Feature 4: Knowledge Library */}
+          <div
+            className="group scholarly-card p-8 rounded-2xl lg:col-span-2 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 min-h-[200px] hover:-translate-y-1 transition-all duration-300 animate-fade-in-up stagger-4"
+            data-testid="feature-card-4"
+          >
+            <div className="flex-1">
+              <div className="w-12 h-12 rounded-xl bg-ink-900 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <Library className="w-6 h-6 text-amber-400" />
+              </div>
+              <h3 className="text-xl font-display font-bold text-ink-900 mb-2">Your Knowledge Library</h3>
+              <p className="text-ink-500 max-w-md">
+                All your research in one place. Organize, tag, and access your academic materials effortlessly.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-amber-600" />
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-ink-100 flex items-center justify-center">
+                <Lightbulb className="w-6 h-6 text-ink-600" />
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                <Brain className="w-6 h-6 text-amber-600" />
               </div>
             </div>
           </div>
 
         </div>
       </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="relative z-10 bg-ink-900 py-24 scroll-mt-20">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="text-center mb-16 animate-fade-in-up">
+            <span className="text-sm font-mono text-amber-400 tracking-wider uppercase mb-4 block">HOW IT WORKS</span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-paper-warm mb-4">
+              Three steps to smarter research
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { step: '01', title: 'Upload', desc: 'Drop your PDFs, papers, or documents into Study Assistant', icon: FileText },
+              { step: '02', title: 'Process', desc: 'Our AI analyzes, indexes, and creates searchable embeddings', icon: Brain },
+              { step: '03', title: 'Discover', desc: 'Search semantically and get instant AI-powered summaries', icon: Lightbulb },
+            ].map((item, i) => (
+              <div key={item.step} className={`text-center animate-fade-in-up stagger-${i + 1}`}>
+                <div className="w-16 h-16 rounded-2xl bg-ink-800 flex items-center justify-center mx-auto mb-6 border border-ink-700">
+                  <item.icon className="w-8 h-8 text-amber-400" />
+                </div>
+                <div className="text-amber-400 font-mono text-sm mb-2">{item.step}</div>
+                <h3 className="text-xl font-display font-bold text-paper-warm mb-2">{item.title}</h3>
+                <p className="text-ink-300">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 container mx-auto px-6 lg:px-12 py-24">
+        <div className="scholarly-card p-12 md:p-16 rounded-3xl text-center relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[100px]" />
+          
+          <div className="relative z-10">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-ink-900 mb-4 animate-fade-in-up">
+              Ready to transform your research?
+            </h2>
+            <p className="text-ink-500 mb-8 max-w-xl mx-auto animate-fade-in-up stagger-1">
+              Join researchers and students using AI to accelerate their academic journey.
+            </p>
+            <Button
+              onClick={() => navigate('/auth')}
+              className="rounded-lg bg-amber-500 hover:bg-amber-600 text-ink-900 px-10 py-6 text-lg font-semibold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 glow-amber animate-fade-in-up stagger-2"
+            >
+              Get Started Free
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-ink-100 py-12">
+        <div className="container mx-auto px-6 lg:px-12">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-ink-900 rounded-lg flex items-center justify-center">
+                <GraduationCap className="w-4 h-4 text-amber-400" />
+              </div>
+              <span className="font-display font-bold text-ink-900">Study Assistant AI</span>
+            </div>
+            <div className="text-sm text-ink-400 font-mono">
+              © 2024 Study Assistant. Built for academics.
+            </div>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );

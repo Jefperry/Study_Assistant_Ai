@@ -2,70 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===========================================
+   Typography: Space Grotesk + JetBrains Mono
+   =========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 body {
     margin: 0;
-    font-family:
-        -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
-        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-        sans-serif;
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'ss01' on, 'ss02' on;
 }
 
 code {
-    font-family:
-        source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
 }
 
+/* ===========================================
+   Scholarly Design System Variables
+   =========================================== */
 @layer base {
     :root {
-        --background: 0 0% 100%;
-        --foreground: 0 0% 3.9%;
+        /* Scholarly Light Theme */
+        --background: 40 20% 98%; /* warm paper */
+        --foreground: 222 47% 11%; /* ink-900 */
         --card: 0 0% 100%;
-        --card-foreground: 0 0% 3.9%;
+        --card-foreground: 222 47% 11%;
         --popover: 0 0% 100%;
-        --popover-foreground: 0 0% 3.9%;
-        --primary: 0 0% 9%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 0 0% 96.1%;
-        --secondary-foreground: 0 0% 9%;
-        --muted: 0 0% 96.1%;
-        --muted-foreground: 0 0% 45.1%;
-        --accent: 0 0% 96.1%;
-        --accent-foreground: 0 0% 9%;
-        --destructive: 0 84.2% 60.2%;
+        --popover-foreground: 222 47% 11%;
+        --primary: 222 47% 11%; /* ink */
+        --primary-foreground: 40 20% 98%;
+        --secondary: 215 20% 95%;
+        --secondary-foreground: 222 47% 11%;
+        --muted: 215 20% 95%;
+        --muted-foreground: 215 16% 47%;
+        --accent: 38 92% 50%; /* amber */
+        --accent-foreground: 222 47% 11%;
+        --destructive: 0 84% 60%;
         --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 89.8%;
-        --input: 0 0% 89.8%;
-        --ring: 0 0% 3.9%;
-        --chart-1: 12 76% 61%;
+        --border: 215 20% 90%;
+        --input: 215 20% 90%;
+        --ring: 38 92% 50%;
+        --chart-1: 38 92% 50%;
         --chart-2: 173 58% 39%;
         --chart-3: 197 37% 24%;
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
+        --radius: 0.75rem;
     }
+    
     .dark {
-        --background: 0 0% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 0 0% 3.9%;
-        --card-foreground: 0 0% 98%;
-        --popover: 0 0% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 0 0% 98%;
-        --primary-foreground: 0 0% 9%;
-        --secondary: 0 0% 14.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 0 0% 14.9%;
-        --muted-foreground: 0 0% 63.9%;
-        --accent: 0 0% 14.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
+        /* Scholarly Dark Theme */
+        --background: 222 47% 6%; /* ink-950 */
+        --foreground: 215 20% 95%;
+        --card: 222 47% 9%;
+        --card-foreground: 215 20% 95%;
+        --popover: 222 47% 9%;
+        --popover-foreground: 215 20% 95%;
+        --primary: 38 92% 50%; /* amber accent */
+        --primary-foreground: 222 47% 6%;
+        --secondary: 222 47% 14%;
+        --secondary-foreground: 215 20% 95%;
+        --muted: 222 47% 14%;
+        --muted-foreground: 215 16% 60%;
+        --accent: 38 92% 50%;
+        --accent-foreground: 222 47% 6%;
+        --destructive: 0 62% 40%;
         --destructive-foreground: 0 0% 98%;
-        --border: 0 0% 14.9%;
-        --input: 0 0% 14.9%;
-        --ring: 0 0% 83.1%;
-        --chart-1: 220 70% 50%;
+        --border: 222 47% 18%;
+        --input: 222 47% 18%;
+        --ring: 38 92% 50%;
+        --chart-1: 38 92% 50%;
         --chart-2: 160 60% 45%;
         --chart-3: 30 80% 55%;
         --chart-4: 280 65% 60%;
@@ -80,6 +88,116 @@ code {
     body {
         @apply bg-background text-foreground;
     }
+    
+    /* Smooth scroll */
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    /* Selection color */
+    ::selection {
+        @apply bg-amber-200/50;
+    }
+    
+    .dark ::selection {
+        @apply bg-amber-500/30;
+    }
+}
+
+/* ===========================================
+   Noise Texture Overlay
+   =========================================== */
+.noise-texture {
+    position: relative;
+}
+
+.noise-texture::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.dark .noise-texture::before {
+    opacity: 0.05;
+}
+
+/* ===========================================
+   Staggered Animation Utilities
+   =========================================== */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+
+/* Initially hidden for animation */
+.animate-on-load {
+    opacity: 0;
+}
+
+/* ===========================================
+   Scholarly Card Styles
+   =========================================== */
+.scholarly-card {
+    @apply relative overflow-hidden;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.dark .scholarly-card {
+    background: linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.7) 100%);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ===========================================
+   Gradient Text
+   =========================================== */
+.gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #0f172a 0%, #334155 50%, #f59e0b 100%);
+}
+
+.dark .gradient-text {
+    background-image: linear-gradient(135deg, #f8fafc 0%, #94a3b8 50%, #f59e0b 100%);
+}
+
+/* ===========================================
+   Glowing Accent
+   =========================================== */
+.glow-amber {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.glow-amber-hover:hover {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.5);
+}
+
+/* ===========================================
+   Scholarly Backgrounds
+   =========================================== */
+.bg-scholarly-light {
+    background: 
+        linear-gradient(135deg, rgba(250, 249, 247, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%),
+        repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(0,0,0,0.01) 50px, rgba(0,0,0,0.01) 51px);
+}
+
+.bg-scholarly-dark {
+    background: 
+        linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+/* Subtle grid pattern for dark mode */
+.bg-grid-pattern {
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
 @layer base {

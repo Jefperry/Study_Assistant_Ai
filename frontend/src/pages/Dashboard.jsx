@@ -10,9 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  Brain, LogOut, Plus, FileText, Trash2, BookOpen, Loader2, 
+  GraduationCap, LogOut, Plus, FileText, Trash2, BookOpen, Loader2, 
   Upload, Search, File, Link, ExternalLink, Sparkles, 
-  AlertCircle, CheckCircle, Clock, RefreshCw
+  AlertCircle, CheckCircle, Clock, RefreshCw, Library, Brain
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../App';
@@ -256,28 +256,38 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-scholarly-dark relative">
+      {/* Background Grid Pattern */}
+      <div className="bg-grid-pattern" />
+      
+      {/* Noise Texture */}
+      <div className="noise-texture" />
+      
+      {/* Ambient Glow */}
+      <div className="absolute top-0 right-0 w-[40%] h-[40%] bg-amber-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[30%] h-[30%] bg-ink-400/10 rounded-full blur-[120px] pointer-events-none" />
+
       {/* Header */}
-      <header className="bg-white/10 backdrop-blur-md border-b border-white/10">
+      <header className="relative z-10 bg-ink-900/80 backdrop-blur-xl border-b border-ink-700/50">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-ink-800 border border-ink-700 rounded-xl flex items-center justify-center shadow-lg">
+                <GraduationCap className="w-5 h-5 text-amber-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">StudyAI</h1>
-                <p className="text-sm text-white/70">Welcome, {user?.full_name || user?.email}</p>
+                <h1 className="text-xl font-display font-bold text-paper-warm">Study Assistant</h1>
+                <p className="text-sm text-ink-400 font-mono">Welcome, {user?.full_name || user?.email}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Badge variant="outline" className="text-white/70 border-white/30">
-                {user?.tier || 'free'} tier
+              <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono text-xs">
+                {user?.tier?.toUpperCase() || 'FREE'} TIER
               </Badge>
               <Button 
                 onClick={handleLogout} 
-                variant="outline"
-                className="gap-2 text-white border-white/30 hover:bg-white/10"
+                variant="ghost"
+                className="gap-2 text-ink-300 hover:text-paper-warm hover:bg-ink-800"
                 data-testid="logout-btn"
               >
                 <LogOut className="w-4 h-4" />
@@ -289,18 +299,27 @@ const Dashboard = () => {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-8">
+      <div className="relative z-10 container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/10 p-1">
-            <TabsTrigger value="papers" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+          <TabsList className="bg-ink-800/50 border border-ink-700/50 p-1 backdrop-blur">
+            <TabsTrigger 
+              value="papers" 
+              className="data-[state=active]:bg-amber-500 data-[state=active]:text-ink-900 text-ink-300 font-medium"
+            >
               <File className="w-4 h-4 mr-2" />
               Papers
             </TabsTrigger>
-            <TabsTrigger value="search" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+            <TabsTrigger 
+              value="search" 
+              className="data-[state=active]:bg-amber-500 data-[state=active]:text-ink-900 text-ink-300 font-medium"
+            >
               <Search className="w-4 h-4 mr-2" />
               Search
             </TabsTrigger>
-            <TabsTrigger value="summaries" className="data-[state=active]:bg-white data-[state=active]:text-gray-900">
+            <TabsTrigger 
+              value="summaries" 
+              className="data-[state=active]:bg-amber-500 data-[state=active]:text-ink-900 text-ink-300 font-medium"
+            >
               <FileText className="w-4 h-4 mr-2" />
               Summaries
             </TabsTrigger>
@@ -311,14 +330,17 @@ const Dashboard = () => {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Papers List */}
               <div className="lg:col-span-1">
-                <Card className="bg-white/10 backdrop-blur border-white/20">
+                <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50">
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-white">My Papers</CardTitle>
+                      <CardTitle className="text-paper-warm font-display flex items-center gap-2">
+                        <Library className="w-5 h-5 text-amber-400" />
+                        My Papers
+                      </CardTitle>
                       <Button 
                         size="sm" 
                         onClick={() => setShowUploadForm(true)}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                        className="bg-amber-500 hover:bg-amber-600 text-ink-900"
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
@@ -327,24 +349,26 @@ const Dashboard = () => {
                   <CardContent className="p-0">
                     <ScrollArea className="h-[calc(100vh-320px)]">
                       {papers.length === 0 ? (
-                        <div className="p-6 text-center text-white/50">
-                          <File className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p>No papers yet</p>
-                          <p className="text-sm">Upload your first PDF!</p>
+                        <div className="p-6 text-center">
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-ink-700/50 flex items-center justify-center">
+                            <File className="w-8 h-8 text-ink-500" />
+                          </div>
+                          <p className="text-ink-400 font-medium">No papers yet</p>
+                          <p className="text-sm text-ink-500 mt-1">Upload your first PDF!</p>
                         </div>
                       ) : (
                         papers.map((paper) => (
                           <div key={paper.id}>
                             <div
-                              className={`p-4 cursor-pointer hover:bg-white/5 transition-colors ${
-                                selectedPaper?.id === paper.id ? 'bg-white/10 border-l-4 border-purple-500' : ''
+                              className={`p-4 cursor-pointer hover:bg-ink-700/30 transition-colors ${
+                                selectedPaper?.id === paper.id ? 'bg-ink-700/50 border-l-2 border-amber-500' : ''
                               }`}
                               onClick={() => setSelectedPaper(paper)}
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-white truncate">{paper.title}</h3>
-                                  <p className="text-sm text-white/50 mt-1">
+                                  <h3 className="font-medium text-paper-warm truncate">{paper.title}</h3>
+                                  <p className="text-sm text-ink-400 font-mono mt-1">
                                     {new Date(paper.created_at).toLocaleDateString()}
                                   </p>
                                   <div className="mt-2">
@@ -364,7 +388,7 @@ const Dashboard = () => {
                                 </Button>
                               </div>
                             </div>
-                            <Separator className="bg-white/10" />
+                            <Separator className="bg-ink-700/50" />
                           </div>
                         ))
                       )}
@@ -376,24 +400,29 @@ const Dashboard = () => {
               {/* Main Content */}
               <div className="lg:col-span-2">
                 {showUploadForm ? (
-                  <Card className="bg-white/10 backdrop-blur border-white/20">
+                  <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50">
                     <CardHeader>
-                      <CardTitle className="text-white">Upload Paper</CardTitle>
-                      <CardDescription className="text-white/70">
+                      <CardTitle className="text-paper-warm font-display">Upload Paper</CardTitle>
+                      <CardDescription className="text-ink-400">
                         Upload a PDF or import from ArXiv
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       {/* File Upload */}
                       <div className="space-y-4">
-                        <h3 className="text-white font-medium">Upload PDF</h3>
+                        <h3 className="text-paper-warm font-medium flex items-center gap-2">
+                          <Upload className="w-4 h-4 text-amber-400" />
+                          Upload PDF
+                        </h3>
                         <div 
-                          className="border-2 border-dashed border-white/30 rounded-xl p-8 text-center hover:border-purple-500 transition-colors cursor-pointer"
+                          className="border-2 border-dashed border-ink-600 rounded-xl p-8 text-center hover:border-amber-500/50 hover:bg-ink-700/30 transition-all cursor-pointer"
                           onClick={() => fileInputRef.current?.click()}
                         >
-                          <Upload className="w-12 h-12 mx-auto mb-4 text-white/50" />
-                          <p className="text-white/70 mb-2">Click to upload or drag and drop</p>
-                          <p className="text-sm text-white/50">PDF files only (max 10MB)</p>
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-ink-700 flex items-center justify-center">
+                            <Upload className="w-8 h-8 text-amber-400" />
+                          </div>
+                          <p className="text-ink-300 mb-2">Click to upload or drag and drop</p>
+                          <p className="text-sm text-ink-500 font-mono">PDF files only (max 10MB)</p>
                           <input
                             ref={fileInputRef}
                             type="file"
@@ -404,25 +433,25 @@ const Dashboard = () => {
                         </div>
                         {isUploading && (
                           <div className="space-y-2">
-                            <Progress value={uploadProgress} className="h-2" />
-                            <p className="text-sm text-white/50 text-center">Uploading... {uploadProgress}%</p>
+                            <Progress value={uploadProgress} className="h-2 bg-ink-700" />
+                            <p className="text-sm text-ink-400 text-center font-mono">Uploading... {uploadProgress}%</p>
                           </div>
                         )}
                       </div>
 
                       <div className="relative">
                         <div className="absolute inset-0 flex items-center">
-                          <Separator className="bg-white/20" />
+                          <Separator className="bg-ink-700" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                          <span className="bg-transparent px-2 text-white/50">Or</span>
+                          <span className="bg-ink-800 px-3 text-ink-500 font-mono">Or</span>
                         </div>
                       </div>
 
                       {/* ArXiv Import */}
                       <div className="space-y-4">
-                        <h3 className="text-white font-medium flex items-center gap-2">
-                          <Link className="w-4 h-4" />
+                        <h3 className="text-paper-warm font-medium flex items-center gap-2">
+                          <Link className="w-4 h-4 text-amber-400" />
                           Import from ArXiv
                         </h3>
                         <div className="flex gap-2">
@@ -430,12 +459,12 @@ const Dashboard = () => {
                             placeholder="https://arxiv.org/abs/2301.00001"
                             value={arxivUrl}
                             onChange={(e) => setArxivUrl(e.target.value)}
-                            className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                            className="bg-ink-700/50 border-ink-600 text-paper-warm placeholder:text-ink-500 focus:border-amber-500 focus:ring-amber-500/20"
                           />
                           <Button 
                             onClick={handleArxivUpload}
                             disabled={isUploading}
-                            className="bg-gradient-to-r from-purple-500 to-pink-500"
+                            className="bg-amber-500 hover:bg-amber-600 text-ink-900"
                           >
                             {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Import'}
                           </Button>
@@ -445,19 +474,19 @@ const Dashboard = () => {
                       <Button 
                         variant="outline" 
                         onClick={() => setShowUploadForm(false)}
-                        className="w-full text-white border-white/30 hover:bg-white/10"
+                        className="w-full text-ink-300 border-ink-600 hover:bg-ink-700 hover:text-paper-warm"
                       >
                         Cancel
                       </Button>
                     </CardContent>
                   </Card>
                 ) : selectedPaper ? (
-                  <Card className="bg-white/10 backdrop-blur border-white/20">
+                  <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50">
                     <CardHeader>
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-white">{selectedPaper.title}</CardTitle>
-                          <CardDescription className="text-white/70">
+                          <CardTitle className="text-paper-warm font-display">{selectedPaper.title}</CardTitle>
+                          <CardDescription className="text-ink-400 font-mono">
                             {selectedPaper.authors?.join(', ') || 'Unknown authors'}
                           </CardDescription>
                         </div>
@@ -466,7 +495,7 @@ const Dashboard = () => {
                             href={`https://arxiv.org/abs/${selectedPaper.arxiv_id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-purple-400 hover:text-purple-300"
+                            className="text-amber-400 hover:text-amber-300 p-2 rounded-lg hover:bg-ink-700"
                           >
                             <ExternalLink className="w-5 h-5" />
                           </a>
@@ -476,8 +505,11 @@ const Dashboard = () => {
                     <CardContent className="space-y-6">
                       {selectedPaper.abstract && (
                         <div>
-                          <h3 className="text-white font-medium mb-2">Abstract</h3>
-                          <p className="text-white/70 text-sm leading-relaxed">
+                          <h3 className="text-paper-warm font-medium mb-3 flex items-center gap-2">
+                            <BookOpen className="w-4 h-4 text-amber-400" />
+                            Abstract
+                          </h3>
+                          <p className="text-ink-300 text-sm leading-relaxed">
                             {selectedPaper.abstract}
                           </p>
                         </div>
@@ -485,24 +517,26 @@ const Dashboard = () => {
 
                       {selectedPaper.summary ? (
                         <div>
-                          <h3 className="text-white font-medium mb-2 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4 text-yellow-400" />
+                          <h3 className="text-paper-warm font-medium mb-3 flex items-center gap-2">
+                            <Sparkles className="w-4 h-4 text-amber-400" />
                             AI Summary
                           </h3>
-                          <div className="bg-purple-500/20 rounded-lg p-4">
-                            <p className="text-white/90 text-sm leading-relaxed whitespace-pre-wrap">
+                          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                            <p className="text-ink-200 text-sm leading-relaxed whitespace-pre-wrap">
                               {selectedPaper.summary.generative_summary || selectedPaper.summary.extractive_summary}
                             </p>
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center py-6">
-                          <Sparkles className="w-12 h-12 mx-auto mb-4 text-yellow-400/50" />
-                          <p className="text-white/50 mb-4">No AI summary yet</p>
+                        <div className="text-center py-8 bg-ink-700/30 rounded-xl border border-ink-600/50">
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-ink-700 flex items-center justify-center">
+                            <Sparkles className="w-8 h-8 text-amber-400/50" />
+                          </div>
+                          <p className="text-ink-400 mb-4">No AI summary yet</p>
                           <Button
                             onClick={() => handleGeneratePaperSummary(selectedPaper.id)}
                             disabled={isGenerating}
-                            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                            className="bg-amber-500 hover:bg-amber-600 text-ink-900 glow-amber"
                           >
                             {isGenerating ? (
                               <>
@@ -521,10 +555,13 @@ const Dashboard = () => {
 
                       {selectedPaper.key_concepts && selectedPaper.key_concepts.length > 0 && (
                         <div>
-                          <h3 className="text-white font-medium mb-2">Key Concepts</h3>
+                          <h3 className="text-paper-warm font-medium mb-3 flex items-center gap-2">
+                            <Brain className="w-4 h-4 text-amber-400" />
+                            Key Concepts
+                          </h3>
                           <div className="flex flex-wrap gap-2">
                             {selectedPaper.key_concepts.map((concept, i) => (
-                              <Badge key={i} variant="secondary" className="bg-purple-500/30 text-purple-200">
+                              <Badge key={i} className="bg-ink-700 text-amber-300 border border-ink-600">
                                 {concept}
                               </Badge>
                             ))}
@@ -534,15 +571,18 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <Card className="bg-white/10 backdrop-blur border-white/20 h-[calc(100vh-320px)] flex items-center justify-center">
+                  <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50 h-[calc(100vh-320px)] flex items-center justify-center">
                     <CardContent className="text-center">
-                      <File className="w-20 h-20 mx-auto mb-4 text-white/30" />
-                      <h3 className="text-xl font-semibold text-white mb-2">No Paper Selected</h3>
-                      <p className="text-white/50 mb-6">Select a paper or upload a new one</p>
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-ink-700/50 flex items-center justify-center">
+                        <File className="w-12 h-12 text-ink-500" />
+                      </div>
+                      <h3 className="text-xl font-display font-semibold text-paper-warm mb-2">No Paper Selected</h3>
+                      <p className="text-ink-400 mb-6">Select a paper or upload a new one</p>
                       <Button 
                         onClick={() => setShowUploadForm(true)}
-                        className="bg-gradient-to-r from-purple-500 to-pink-500"
+                        className="bg-amber-500 hover:bg-amber-600 text-ink-900 glow-amber"
                       >
+                        <Plus className="w-4 h-4 mr-2" />
                         Upload Your First Paper
                       </Button>
                     </CardContent>
@@ -554,10 +594,13 @@ const Dashboard = () => {
 
           {/* Search Tab */}
           <TabsContent value="search">
-            <Card className="bg-white/10 backdrop-blur border-white/20">
+            <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50">
               <CardHeader>
-                <CardTitle className="text-white">Semantic Search</CardTitle>
-                <CardDescription className="text-white/70">
+                <CardTitle className="text-paper-warm font-display flex items-center gap-2">
+                  <Search className="w-5 h-5 text-amber-400" />
+                  Semantic Search
+                </CardTitle>
+                <CardDescription className="text-ink-400">
                   Search across all your papers using natural language
                 </CardDescription>
               </CardHeader>
@@ -568,12 +611,12 @@ const Dashboard = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                    className="bg-ink-700/50 border-ink-600 text-paper-warm placeholder:text-ink-500 focus:border-amber-500 focus:ring-amber-500/20"
                   />
                   <Button 
                     onClick={handleSearch}
                     disabled={isSearching}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500"
+                    className="bg-amber-500 hover:bg-amber-600 text-ink-900 px-6"
                   >
                     {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                   </Button>
@@ -581,18 +624,20 @@ const Dashboard = () => {
 
                 {searchResults.length > 0 && (
                   <div className="space-y-4">
-                    <h3 className="text-white font-medium">Results ({searchResults.length})</h3>
+                    <h3 className="text-paper-warm font-medium font-mono text-sm">
+                      RESULTS ({searchResults.length})
+                    </h3>
                     {searchResults.map((result, i) => (
-                      <Card key={i} className="bg-white/5 border-white/10">
+                      <Card key={i} className="bg-ink-700/30 border-ink-600/50 hover:border-amber-500/30 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
-                              <h4 className="text-white font-medium">{result.paper?.title || 'Untitled'}</h4>
-                              <p className="text-white/70 text-sm mt-2 line-clamp-3">
+                              <h4 className="text-paper-warm font-medium">{result.paper?.title || 'Untitled'}</h4>
+                              <p className="text-ink-300 text-sm mt-2 line-clamp-3">
                                 {result.chunk_text}
                               </p>
-                              <Badge variant="outline" className="mt-2 text-purple-300 border-purple-500/50">
-                                Similarity: {(result.similarity * 100).toFixed(1)}%
+                              <Badge className="mt-3 bg-amber-500/20 text-amber-400 border border-amber-500/30 font-mono text-xs">
+                                {(result.similarity * 100).toFixed(1)}% match
                               </Badge>
                             </div>
                           </div>
@@ -603,9 +648,12 @@ const Dashboard = () => {
                 )}
 
                 {searchResults.length === 0 && !isSearching && (
-                  <div className="text-center py-12">
-                    <Search className="w-16 h-16 mx-auto mb-4 text-white/30" />
-                    <p className="text-white/50">Enter a query to search your papers</p>
+                  <div className="text-center py-16">
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-ink-700/50 flex items-center justify-center">
+                      <Search className="w-10 h-10 text-ink-500" />
+                    </div>
+                    <p className="text-ink-400">Enter a query to search your papers</p>
+                    <p className="text-ink-500 text-sm mt-1">Use natural language to find relevant passages</p>
                   </div>
                 )}
               </CardContent>
@@ -617,33 +665,38 @@ const Dashboard = () => {
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Summaries List */}
               <div className="lg:col-span-1">
-                <Card className="bg-white/10 backdrop-blur border-white/20">
+                <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50">
                   <CardHeader>
-                    <CardTitle className="text-white">Paper Summaries</CardTitle>
+                    <CardTitle className="text-paper-warm font-display flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-amber-400" />
+                      Paper Summaries
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
                     <ScrollArea className="h-[calc(100vh-320px)]">
                       {summaries.length === 0 ? (
-                        <div className="p-6 text-center text-white/50">
-                          <BookOpen className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                          <p>No summaries yet</p>
-                          <p className="text-sm">Generate summaries from your papers!</p>
+                        <div className="p-6 text-center">
+                          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-ink-700/50 flex items-center justify-center">
+                            <BookOpen className="w-8 h-8 text-ink-500" />
+                          </div>
+                          <p className="text-ink-400 font-medium">No summaries yet</p>
+                          <p className="text-sm text-ink-500 mt-1">Generate summaries from your papers!</p>
                         </div>
                       ) : (
                         summaries.map((summary) => (
                           <div key={summary.id}>
                             <div
-                              className={`p-4 cursor-pointer hover:bg-white/5 transition-colors ${
-                                selectedSummary?.id === summary.id ? 'bg-white/10 border-l-4 border-purple-500' : ''
+                              className={`p-4 cursor-pointer hover:bg-ink-700/30 transition-colors ${
+                                selectedSummary?.id === summary.id ? 'bg-ink-700/50 border-l-2 border-amber-500' : ''
                               }`}
                               onClick={() => setSelectedSummary(summary)}
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold text-white truncate">
+                                  <h3 className="font-medium text-paper-warm truncate">
                                     {summary.paper?.title || 'Summary'}
                                   </h3>
-                                  <p className="text-sm text-white/50 mt-1">
+                                  <p className="text-sm text-ink-400 font-mono mt-1">
                                     {new Date(summary.created_at).toLocaleDateString()}
                                   </p>
                                 </div>
@@ -660,7 +713,7 @@ const Dashboard = () => {
                                 </Button>
                               </div>
                             </div>
-                            <Separator className="bg-white/10" />
+                            <Separator className="bg-ink-700/50" />
                           </div>
                         ))
                       )}
@@ -672,22 +725,25 @@ const Dashboard = () => {
               {/* Summary Detail */}
               <div className="lg:col-span-2">
                 {selectedSummary ? (
-                  <Card className="bg-white/10 backdrop-blur border-white/20">
+                  <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50">
                     <CardHeader>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-yellow-400" />
+                      <CardTitle className="text-paper-warm font-display flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-amber-400" />
                         {selectedSummary.paper?.title || 'Summary'}
                       </CardTitle>
-                      <CardDescription className="text-white/70">
+                      <CardDescription className="text-ink-400 font-mono">
                         Generated on {new Date(selectedSummary.created_at).toLocaleDateString()}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                       {selectedSummary.generative_summary && (
                         <div>
-                          <h3 className="text-white font-medium mb-2">AI Summary</h3>
-                          <div className="bg-purple-500/20 rounded-lg p-4">
-                            <p className="text-white/90 whitespace-pre-wrap">
+                          <h3 className="text-paper-warm font-medium mb-3 flex items-center gap-2">
+                            <Brain className="w-4 h-4 text-amber-400" />
+                            AI Summary
+                          </h3>
+                          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                            <p className="text-ink-200 whitespace-pre-wrap leading-relaxed">
                               {selectedSummary.generative_summary}
                             </p>
                           </div>
@@ -696,9 +752,12 @@ const Dashboard = () => {
 
                       {selectedSummary.extractive_summary && (
                         <div>
-                          <h3 className="text-white font-medium mb-2">Key Excerpts</h3>
-                          <div className="bg-blue-500/20 rounded-lg p-4">
-                            <p className="text-white/90 whitespace-pre-wrap">
+                          <h3 className="text-paper-warm font-medium mb-3 flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-amber-400" />
+                            Key Excerpts
+                          </h3>
+                          <div className="bg-ink-700/30 border border-ink-600/50 rounded-xl p-4">
+                            <p className="text-ink-200 whitespace-pre-wrap leading-relaxed">
                               {selectedSummary.extractive_summary}
                             </p>
                           </div>
@@ -707,10 +766,10 @@ const Dashboard = () => {
 
                       {selectedSummary.key_concepts && selectedSummary.key_concepts.length > 0 && (
                         <div>
-                          <h3 className="text-white font-medium mb-2">Key Concepts</h3>
+                          <h3 className="text-paper-warm font-medium mb-3">Key Concepts</h3>
                           <div className="flex flex-wrap gap-2">
                             {selectedSummary.key_concepts.map((concept, i) => (
-                              <Badge key={i} variant="secondary" className="bg-purple-500/30 text-purple-200">
+                              <Badge key={i} className="bg-ink-700 text-amber-300 border border-ink-600">
                                 {concept}
                               </Badge>
                             ))}
@@ -720,11 +779,13 @@ const Dashboard = () => {
                     </CardContent>
                   </Card>
                 ) : (
-                  <Card className="bg-white/10 backdrop-blur border-white/20 h-[calc(100vh-320px)] flex items-center justify-center">
+                  <Card className="bg-ink-800/50 backdrop-blur border-ink-700/50 h-[calc(100vh-320px)] flex items-center justify-center">
                     <CardContent className="text-center">
-                      <BookOpen className="w-20 h-20 mx-auto mb-4 text-white/30" />
-                      <h3 className="text-xl font-semibold text-white mb-2">No Summary Selected</h3>
-                      <p className="text-white/50">Select a summary from the list</p>
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-3xl bg-ink-700/50 flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-ink-500" />
+                      </div>
+                      <h3 className="text-xl font-display font-semibold text-paper-warm mb-2">No Summary Selected</h3>
+                      <p className="text-ink-400">Select a summary from the list</p>
                     </CardContent>
                   </Card>
                 )}
