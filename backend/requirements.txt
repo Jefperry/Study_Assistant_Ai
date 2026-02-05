@@ -42,6 +42,7 @@ torch>=2.9.0
 PyMuPDF>=1.23.8
 pdfplumber>=0.10.3
 arxiv>=2.1.0
+groq>=0.3.0
 
 # ============================================
 # Authentication & Security
