@@ -23,7 +23,9 @@ class PaperSource(str, Enum):
 class ProcessingStatus(str, Enum):
     """Processing status of paper."""
     PENDING = "pending"
-    PROCESSING = "processing"
+    EXTRACTING = "extracting"
+    EMBEDDING = "embedding"
+    SUMMARIZING = "summarizing"
     COMPLETED = "completed"
     FAILED = "failed"
 

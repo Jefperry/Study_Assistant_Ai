@@ -200,9 +200,9 @@ async def import_arxiv_paper(
     
     try:
         # Fetch paper metadata from ArXiv API
-        arxiv_api_url = f"http://export.arxiv.org/api/query?id_list={arxiv_id}"
+        arxiv_api_url = f"https://export.arxiv.org/api/query?id_list={arxiv_id}"
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
             response = await client.get(arxiv_api_url)
             response.raise_for_status()
         
@@ -210,7 +210,7 @@ async def import_arxiv_paper(
         import xml.etree.ElementTree as ET
         root = ET.fromstring(response.text)
         
-        # Namespace handling for Atom feed
+        # Namespace handling for Atom feed (use http:// - these are XML namespace identifiers)
         ns = {
             'atom': 'http://www.w3.org/2005/Atom',
             'arxiv': 'http://arxiv.org/schemas/atom'
