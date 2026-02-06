@@ -47,9 +47,9 @@ class Settings(BaseSettings):
 
     # 
     # AI Services (Groq)
-    # 
+    # Note: Don't set GROQ_BASE_URL with /openai/v1 - the SDK appends it automatically
     GROQ_API_KEY: str
-    GROQ_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROQ_BASE_URL: str = "https://api.groq.com"  # SDK appends /openai/v1 automatically
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
     # 
@@ -67,7 +67,7 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS_ORIGINS string into a list."""
-        origins = [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        origins = [origin.strip().rstrip('/') for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
         # If "*" is specified, return it as a list for the middleware
         if "*" in origins:
             return ["*"]
