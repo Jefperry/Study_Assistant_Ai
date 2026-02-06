@@ -190,8 +190,9 @@ class SummarizationService:
             return await self._generate_extractive_summary(text)
         
         # Build prompt based on summary type
+        # Using string keys since we accept various summary types from the API
         prompts = {
-            SummaryType.BRIEF: f"""Summarize this research paper in 2-3 concise paragraphs.
+            "brief": f"""Summarize this research paper in 2-3 concise paragraphs.
 Focus on: main objective, methodology, key findings, and conclusions.
 
 Title: {title}
@@ -201,7 +202,7 @@ Paper text:
 
 Provide a clear, academic summary:""",
 
-            SummaryType.DETAILED: f"""Provide a comprehensive summary of this research paper.
+            "detailed": f"""Provide a comprehensive summary of this research paper.
 Include: background, objectives, methodology, results, discussion, and conclusions.
 Use bullet points for key findings.
 
@@ -212,7 +213,7 @@ Paper text:
 
 Detailed summary:""",
 
-            SummaryType.KEY_POINTS: f"""Extract the key points from this research paper as a bullet-point list.
+            "key_points": f"""Extract the key points from this research paper as a bullet-point list.
 Include: main findings, methodology highlights, and practical implications.
 
 Title: {title}
@@ -222,7 +223,7 @@ Paper text:
 
 Key points:""",
 
-            SummaryType.ABSTRACT: f"""Write an academic abstract (150-250 words) for this research paper.
+            "abstract": f"""Write an academic abstract (150-250 words) for this research paper.
 Follow standard abstract structure: background, methods, results, conclusions.
 
 Title: {title}
@@ -231,11 +232,22 @@ Paper text:
 {text[:6000]}
 
 Abstract:""",
+
+            "generative": f"""Summarize this research paper in 2-3 concise paragraphs.
+Focus on: main objective, methodology, key findings, and conclusions.
+
+Title: {title}
+
+Paper text:
+{text[:8000]}
+
+Provide a clear, academic summary:""",
         }
         
+        # Get prompt by summary type value (string) or use default
         prompt = prompts.get(
-            summary_type,
-            prompts[SummaryType.BRIEF]
+            summary_type.value if hasattr(summary_type, 'value') else str(summary_type),
+            prompts["brief"]
         )
         
         try:
