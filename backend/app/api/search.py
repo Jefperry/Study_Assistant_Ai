@@ -123,10 +123,10 @@ async def search_papers(
             relevance=relevance
         ))
     
-    # Update user search count
-    if current_user:
-        current_user.searches_performed += 1
-        await db.commit()
+    # TODO: Add search tracking when User model is updated
+    # if current_user:
+    #     current_user.searches_performed += 1
+    #     await db.commit()
     
     return SearchResponse(
         query=request.query,

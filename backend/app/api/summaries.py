@@ -70,12 +70,8 @@ async def create_summary(
             detail="Paper not found"
         )
     
-    # Check user's summary limit
-    if current_user.summaries_generated >= current_user.summaries_limit:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Summary limit reached ({current_user.summaries_limit}). Upgrade to continue."
-        )
+    # TODO: Add summary limit tracking when User model is updated
+    # For now, allow unlimited summaries
     
     # Map enum to model enum
     summary_type_map = {
@@ -93,10 +89,6 @@ async def create_summary(
             db=db,
             user_id=current_user.id
         )
-        
-        # Update user's usage
-        current_user.summaries_generated += 1
-        await db.commit()
         
         logger.info(f"Summary generated for paper {paper.id} by user {current_user.id}")
         
