@@ -31,13 +31,23 @@ async def lifespan(app: FastAPI):
     """
     Handles application startup and shutdown events.
     
-    Startup: Log configuration, verify connections.
+    Startup: Log configuration, verify connections, pre-load ML models.
     Shutdown: Clean up resources.
     """
     # Startup
     logger.info(f"Starting {settings.APP_NAME} in {settings.ENVIRONMENT} mode")
     logger.info(f"Debug mode: {settings.DEBUG}")
     logger.info(f"CORS origins: {settings.cors_origins_list}")
+    
+    # Pre-load embedding model for search (avoids timeout on first request)
+    try:
+        logger.info("Pre-loading embedding model for search...")
+        from app.services.embedding_service import get_embedding_model
+        get_embedding_model()
+        logger.info("Embedding model loaded successfully!")
+    except Exception as e:
+        logger.warning(f"Failed to pre-load embedding model: {e}")
+        logger.warning("Search will load model on first request (may be slow)")
     
     yield
     

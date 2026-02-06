@@ -23,3 +23,7 @@ services:
         value: production
       - key: DEBUG
         value: "false"
+      - key: HF_HOME
+        value: "/opt/render/.cache/huggingface"
+      - key: TRANSFORMERS_CACHE
+        value: "/opt/render/.cache/huggingface"
