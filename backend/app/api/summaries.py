@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
 from app.models.paper import Paper
-from app.models.summary import Summary, SummaryType
+from app.models.summary import Summary
 from app.models.user import User
 from app.schemas.summary import (
     FlashcardCreate,
@@ -73,19 +73,28 @@ async def create_summary(
     # TODO: Add summary limit tracking when User model is updated
     # For now, allow unlimited summaries
     
-    # Map enum to model enum
-    summary_type_map = {
-        SummaryTypeEnum.BRIEF: SummaryType.BRIEF,
-        SummaryTypeEnum.DETAILED: SummaryType.DETAILED,
-        SummaryTypeEnum.KEY_POINTS: SummaryType.KEY_POINTS,
-        SummaryTypeEnum.ABSTRACT: SummaryType.ABSTRACT,
-        SummaryTypeEnum.EXTRACTIVE: SummaryType.EXTRACTIVE,
+    # Map schema enum to model enum
+    # The service accepts: EXTRACTIVE (uses BART), others use Groq
+    from app.models.summary import SummaryType as ModelSummaryType
+    
+    # Map user-friendly types to internal types
+    type_mapping = {
+        "brief": ModelSummaryType.GENERATIVE,      # Use Groq for brief
+        "detailed": ModelSummaryType.GENERATIVE,   # Use Groq for detailed
+        "key_points": ModelSummaryType.GENERATIVE, # Use Groq for key points
+        "abstract": ModelSummaryType.GENERATIVE,   # Use Groq for abstract
+        "extractive": ModelSummaryType.EXTRACTIVE, # Use BART for extractive
     }
+    
+    internal_type = type_mapping.get(
+        summary_data.summary_type.value,
+        ModelSummaryType.GENERATIVE
+    )
     
     try:
         summary = await summarization_service.generate_summary(
             paper_id=summary_data.paper_id,
-            summary_type=summary_type_map[summary_data.summary_type],
+            summary_type=internal_type,
             db=db,
             user_id=current_user.id
         )

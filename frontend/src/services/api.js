@@ -152,7 +152,7 @@ export const summariesAPI = {
 // ===========================================
 export const searchAPI = {
   semantic: (query, limit = 10, minScore = 0.3) => 
-    api.post('/search', { query, limit, min_score: minScore }),
+    api.post('/search', { query, limit, min_score: minScore }, { timeout: 60000 }), // 60s for ML model loading
   
   history: (limit = 20) => api.get('/search/history', { params: { limit } }),
 };
