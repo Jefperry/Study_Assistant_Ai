@@ -173,7 +173,6 @@ class PaperService:
             paper_id=paper.id,
             full_text=pdf_data.get("full_text"),
             sections=pdf_data.get("sections"),
-            extraction_metadata=pdf_data.get("metadata"),
         )
         
         self.db.add(content)
@@ -264,7 +263,6 @@ class PaperService:
             paper_id=paper.id,
             full_text=pdf_data.get("full_text"),
             sections=pdf_data.get("sections"),
-            extraction_metadata=pdf_data.get("metadata"),
         )
         
         self.db.add(content)
