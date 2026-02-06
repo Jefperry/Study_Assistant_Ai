@@ -24,6 +24,7 @@ from app.schemas.paper import (
     UploadResponse,
 )
 from app.services.paper_service import PaperService
+from app.services.search_service import SearchService
 
 logger = logging.getLogger(__name__)
 
@@ -111,9 +112,13 @@ async def upload_paper(
         
         logger.info(f"Paper uploaded: {paper.id} by user {current_user.id}")
         
-        # TODO: Queue background processing task
-        # from app.tasks.paper_tasks import process_paper
-        # process_paper.delay(str(paper.id))
+        # Auto-index for search
+        try:
+            search_service = SearchService(db)
+            chunks_indexed = await search_service.index_paper(paper.id)
+            logger.info(f"Auto-indexed {chunks_indexed} chunks for paper {paper.id}")
+        except Exception as e:
+            logger.warning(f"Auto-indexing failed for paper {paper.id}: {e}")
         
         return UploadResponse(
             paper=PaperResponse.model_validate(paper),
@@ -276,6 +281,14 @@ async def import_arxiv_paper(
         )
         
         logger.info(f"ArXiv paper imported: {paper.id} ({arxiv_id}) by user {current_user.id}")
+        
+        # Auto-index for search
+        try:
+            search_service = SearchService(db)
+            chunks_indexed = await search_service.index_paper(paper.id)
+            logger.info(f"Auto-indexed {chunks_indexed} chunks for ArXiv paper {paper.id}")
+        except Exception as e:
+            logger.warning(f"Auto-indexing failed for ArXiv paper {paper.id}: {e}")
         
         return UploadResponse(
             paper=PaperResponse.model_validate(paper),

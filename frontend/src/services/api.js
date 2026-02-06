@@ -151,8 +151,8 @@ export const summariesAPI = {
 // Search API
 // ===========================================
 export const searchAPI = {
-  semantic: (query, limit = 10, threshold = 0.5) => 
-    api.post('/search', { query, limit, threshold }),
+  semantic: (query, limit = 10, minScore = 0.3) => 
+    api.post('/search', { query, limit, min_score: minScore }),
   
   history: (limit = 20) => api.get('/search/history', { params: { limit } }),
 };
@@ -168,11 +168,10 @@ export const aiAPI = {
       generate_flashcards: generateFlashcards,
     }),
   
-  summarizePaper: (paperId, summaryType = 'comprehensive', useGroq = true) =>
-    api.post('/summaries/generate', {
+  summarizePaper: (paperId, summaryType = 'brief') =>
+    api.post('/summaries', {
       paper_id: paperId,
       summary_type: summaryType,
-      use_groq: useGroq,
     }),
 };
 
