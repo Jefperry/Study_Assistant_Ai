@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class SummaryTypeEnum(str, Enum):
@@ -60,12 +60,32 @@ class SummaryResponse(BaseModel):
     id: UUID
     paper_id: UUID
     summary_type: str
-    content: str
+    content: Optional[str] = None
     model_used: Optional[str] = None
     status: str
     created_at: datetime
+    key_points: Optional[list] = None
+    
+    # Frontend compatibility fields (computed in model_validator)
+    generative_summary: Optional[str] = None
+    extractive_summary: Optional[str] = None
+    key_concepts: Optional[list] = None
     
     model_config = {"from_attributes": True}
+    
+    @model_validator(mode='after')
+    def set_frontend_fields(self):
+        """Set frontend-compatible field names."""
+        # Set generative_summary from content
+        if self.content and self.summary_type != "extractive":
+            self.generative_summary = self.content
+        # Set extractive_summary from content if extractive type
+        if self.content and self.summary_type == "extractive":
+            self.extractive_summary = self.content
+        # Set key_concepts from key_points
+        if self.key_points:
+            self.key_concepts = self.key_points
+        return self
 
 
 class SummaryListResponse(BaseModel):
