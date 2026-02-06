@@ -163,6 +163,12 @@ class Paper(BaseModel):
         nullable=True,
     )
     
+    # Tags for organization
+    tags: Mapped[Optional[list[str]]] = mapped_column(
+        ARRAY(String(100)),
+        nullable=True,
+    )
+    
     # Processing Status
     status: Mapped[str] = mapped_column(
         String(20),
