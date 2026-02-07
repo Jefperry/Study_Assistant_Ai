@@ -39,15 +39,22 @@ async def lifespan(app: FastAPI):
     logger.info(f"Debug mode: {settings.DEBUG}")
     logger.info(f"CORS origins: {settings.cors_origins_list}")
     
-    # Pre-load embedding model for search (avoids timeout on first request)
-    try:
-        logger.info("Pre-loading embedding model for search...")
-        from app.services.embedding_service import get_embedding_model
-        get_embedding_model()
-        logger.info("Embedding model loaded successfully!")
-    except Exception as e:
-        logger.warning(f"Failed to pre-load embedding model: {e}")
-        logger.warning("Search will load model on first request (may be slow)")
+    # Pre-load embedding model in background thread (non-blocking)
+    # This allows the server to start immediately while model loads
+    import threading
+    def load_embedding_model():
+        try:
+            logger.info("Background: Loading embedding model for search...")
+            from app.services.embedding_service import get_embedding_model
+            get_embedding_model()
+            logger.info("Background: Embedding model loaded successfully!")
+        except Exception as e:
+            logger.warning(f"Background: Failed to pre-load embedding model: {e}")
+    
+    # Start model loading in background thread
+    thread = threading.Thread(target=load_embedding_model, daemon=True)
+    thread.start()
+    logger.info("Server started - embedding model loading in background")
     
     yield
     
