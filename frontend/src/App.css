@@ -85,3 +85,15 @@ h1, h2, h3, h4, h5, h6 {
   animation-delay: 0.4s;
   opacity: 0;
 }
+
+/* Swipe hint animation */
+@keyframes swipeHint {
+  0%, 100% { transform: translateX(0); }
+  40% { transform: translateX(-30px); }
+  60% { transform: translateX(-30px); }
+  80% { transform: translateX(0); }
+}
+
+.swipe-hint {
+  animation: swipeHint 2s ease-in-out 1.5s 1;
+}

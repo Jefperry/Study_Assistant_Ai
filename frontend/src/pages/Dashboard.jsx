@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,6 +43,11 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('papers');
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [arxivUrl, setArxivUrl] = useState('');
+
+  // Swipe-to-delete state
+  const [swipeState, setSwipeState] = useState({});
+  const swipeRef = useRef({ startX: 0, currentX: 0, paperId: null, isSwiping: false });
+  const SWIPE_THRESHOLD = 80;
 
   useEffect(() => {
     fetchPapers();
@@ -233,6 +238,39 @@ const Dashboard = () => {
     }
   };
 
+  // ===========================================
+  // Swipe-to-Delete Handlers
+  // ===========================================
+  const handleSwipeStart = useCallback((paperId, clientX) => {
+    swipeRef.current = { startX: clientX, currentX: clientX, paperId, isSwiping: true };
+  }, []);
+
+  const handleSwipeMove = useCallback((paperId, clientX) => {
+    if (!swipeRef.current.isSwiping || swipeRef.current.paperId !== paperId) return;
+    swipeRef.current.currentX = clientX;
+    const diff = swipeRef.current.startX - clientX;
+    // Only allow swiping left (positive diff), clamp to max 120px
+    const offset = Math.max(0, Math.min(diff, 120));
+    setSwipeState(prev => ({ ...prev, [paperId]: offset }));
+  }, []);
+
+  const handleSwipeEnd = useCallback((paperId) => {
+    if (!swipeRef.current.isSwiping || swipeRef.current.paperId !== paperId) return;
+    swipeRef.current.isSwiping = false;
+    const offset = swipeState[paperId] || 0;
+    if (offset >= SWIPE_THRESHOLD) {
+      // Snap open to show delete button
+      setSwipeState(prev => ({ ...prev, [paperId]: 100 }));
+    } else {
+      // Snap closed
+      setSwipeState(prev => ({ ...prev, [paperId]: 0 }));
+    }
+  }, [swipeState, SWIPE_THRESHOLD]);
+
+  const handleSwipeReset = useCallback((paperId) => {
+    setSwipeState(prev => ({ ...prev, [paperId]: 0 }));
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -345,6 +383,9 @@ const Dashboard = () => {
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
+                    {papers.length > 0 && (
+                      <p className="text-xs text-ink-500 mt-1">← Swipe left to delete</p>
+                    )}
                   </CardHeader>
                   <CardContent className="p-0">
                     <ScrollArea className="h-[calc(100vh-320px)]">
@@ -357,40 +398,75 @@ const Dashboard = () => {
                           <p className="text-sm text-ink-500 mt-1">Upload your first PDF!</p>
                         </div>
                       ) : (
-                        papers.map((paper) => (
-                          <div key={paper.id}>
-                            <div
-                              className={`p-4 cursor-pointer hover:bg-ink-700/30 transition-colors ${
-                                selectedPaper?.id === paper.id ? 'bg-ink-700/50 border-l-2 border-amber-500' : ''
-                              }`}
-                              onClick={() => setSelectedPaper(paper)}
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-medium text-paper-warm truncate">{paper.title}</h3>
-                                  <p className="text-sm text-ink-400 font-mono mt-1">
-                                    {new Date(paper.created_at).toLocaleDateString()}
-                                  </p>
-                                  <div className="mt-2">
-                                    {getStatusBadge(paper.processing_status || 'completed')}
-                                  </div>
-                                </div>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
+                        papers.map((paper, index) => {
+                          const offset = swipeState[paper.id] || 0;
+                          return (
+                            <div key={paper.id} className="relative overflow-hidden">
+                              {/* Delete button behind the card */}
+                              <div 
+                                className="absolute inset-y-0 right-0 flex items-center justify-center bg-red-600 transition-opacity"
+                                style={{ width: '100px', opacity: offset > 20 ? 1 : 0 }}
+                              >
+                                <button
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    handleSwipeReset(paper.id);
                                     handleDeletePaper(paper.id);
                                   }}
-                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+                                  className="flex flex-col items-center gap-1 text-white px-4 py-2 w-full h-full justify-center hover:bg-red-700 transition-colors"
                                 >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
+                                  <Trash2 className="w-5 h-5" />
+                                  <span className="text-xs font-medium">Delete</span>
+                                </button>
                               </div>
+
+                              {/* Swipeable card */}
+                              <div
+                                className={`relative p-4 cursor-pointer hover:bg-ink-700/30 bg-ink-800/50 ${
+                                  selectedPaper?.id === paper.id ? 'bg-ink-700/50 border-l-2 border-amber-500' : ''
+                                } ${index === 0 && offset === 0 ? 'swipe-hint' : ''}`}
+                                style={{
+                                  transform: `translateX(-${offset}px)`,
+                                  transition: swipeRef.current.isSwiping ? 'none' : 'transform 0.3s ease',
+                                }}
+                                onClick={() => {
+                                  if (offset > 10) {
+                                    handleSwipeReset(paper.id);
+                                  } else {
+                                    setSelectedPaper(paper);
+                                  }
+                                }}
+                                onTouchStart={(e) => handleSwipeStart(paper.id, e.touches[0].clientX)}
+                                onTouchMove={(e) => handleSwipeMove(paper.id, e.touches[0].clientX)}
+                                onTouchEnd={() => handleSwipeEnd(paper.id)}
+                                onMouseDown={(e) => handleSwipeStart(paper.id, e.clientX)}
+                                onMouseMove={(e) => {
+                                  if (swipeRef.current.isSwiping) {
+                                    e.preventDefault();
+                                    handleSwipeMove(paper.id, e.clientX);
+                                  }
+                                }}
+                                onMouseUp={() => handleSwipeEnd(paper.id)}
+                                onMouseLeave={() => {
+                                  if (swipeRef.current.isSwiping) handleSwipeEnd(paper.id);
+                                }}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-paper-warm truncate">{paper.title}</h3>
+                                    <p className="text-sm text-ink-400 font-mono mt-1">
+                                      {new Date(paper.created_at).toLocaleDateString()}
+                                    </p>
+                                    <div className="mt-2">
+                                      {getStatusBadge(paper.processing_status || 'completed')}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                              <Separator className="bg-ink-700/50" />
                             </div>
-                            <Separator className="bg-ink-700/50" />
-                          </div>
-                        ))
+                          );
+                        })
                       )}
                     </ScrollArea>
                   </CardContent>
